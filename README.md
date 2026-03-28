@@ -1,4 +1,4 @@
-# Paper Research Agent
+# PaperAssistant
 
 A ChatGPT-style research assistant for automatic paper retrieval, analysis, and comparison.
 
