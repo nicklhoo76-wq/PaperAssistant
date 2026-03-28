@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# 虚拟环境
+agent-env/
+
+# PDF缓存
+pdfs/
+
+# Streamlit
+.streamlit/
+
+# OS
+.DS_Store
