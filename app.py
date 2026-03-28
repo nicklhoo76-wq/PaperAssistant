@@ -6,7 +6,7 @@ from streamlit_pdf_viewer import pdf_viewer
 import requests
 import os
 
-st.set_page_config(page_title="Paper Agent Pro", layout="wide")
+st.set_page_config(page_title="PaperAssistant", layout="wide")
 
 # ----------------------------
 # 初始化
@@ -48,7 +48,7 @@ with st.sidebar:
 # 中间：主分析
 # ============================
 with col_main:
-    st.title("Research Agent")
+    st.title("PaperAssistant")
 
     query = st.chat_input("输入研究问题...")
 
