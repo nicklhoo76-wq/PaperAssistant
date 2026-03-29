@@ -1,11 +1,11 @@
 import streamlit as st
 from retrieval.search import safe_search
+from retrieval.download import download_pdf
 from extraction.extractor import extract_summary
 from comparison.compare import compare_papers
 from streamlit_pdf_viewer import pdf_viewer
-import requests
+from rag.rag_pipeline import build_rag, query_rag
 import os
-
 
 st.set_page_config(page_title="PaperAssistant", layout="wide")
 
@@ -27,6 +27,15 @@ if "running" not in st.session_state:
 if "selected_pdf" not in st.session_state:
     st.session_state.selected_pdf = None
 
+if "rag_store" not in st.session_state:
+    st.session_state.rag_store = None
+
+if "rag_pdf" not in st.session_state:
+    st.session_state.rag_pdf = None
+
+if "clicked" not in st.session_state:
+    st.session_state.clicked = False
+
 os.makedirs("pdfs", exist_ok=True)
 
 # ----------------------------
@@ -38,11 +47,7 @@ col_main, col_pdf = st.columns([2, 2])
 # 左侧：对话历史
 # ============================
 with st.sidebar:
-    st.title("历史对话")
-    for i, msg in enumerate(st.session_state.messages):
-        role = "你" if msg["role"] == "user" else "助手"
-        st.markdown(f"{i+1}. **{role}**: {msg['content'][:50]}{'...' if len(msg['content'])>50 else ''}")
-
+    st.title("导航栏")
     st.header("设置")
     max_papers = st.slider("检索论文数量", min_value=2, max_value=6, value=4)
     if st.button("清空历史"):
@@ -51,6 +56,14 @@ with st.sidebar:
         st.session_state.current_query = None
         st.session_state.running = False
         st.rerun()
+
+    st.header("历史对话")
+    for i, msg in enumerate(st.session_state.messages):
+        role = "你" if msg["role"] == "user" else "助手"
+        if i % 2 == 0:
+            st.markdown(f"{int(i/2+1)}. **{role}**: {msg['content'][:50]}{'...' if len(msg['content'])>50 else ''}")
+        else:
+            st.markdown(f"  **{role}**: {msg['content'][:50]}{'...' if len(msg['content'])>50 else ''}\n\n")
 
 # ============================
 # 中间：主分析
@@ -144,21 +157,31 @@ with col_main:
             # =========================
 
             # 论文列表
-            with st.expander("查看论文"):
-                for i, p in enumerate(papers):
-                    st.markdown(f"### {p['title']}")
+            st.subheader("论文列表")
 
-                    if st.button(f"查看PDF {i}", key=f"pdf_btn_{i}"):
-                        st.session_state.selected_pdf = file_path
-                        pdf_url = p["pdf_url"]
+            for i, p in enumerate(papers):
 
-                        file_path = f"pdfs/paper_{i}.pdf"
+                st.markdown(f"### {p['title']}")
 
-                        # 下载 PDF
-                        if not os.path.exists(file_path):
-                            r = requests.get(pdf_url, timeout=10)
-                            with open(file_path, "wb") as f:
-                                f.write(r.content)
+                pdf_url = p.get("pdf_url")
+
+                if not pdf_url:
+                    st.info("该论文没有开放PDF")
+                    continue
+
+                if st.button(f"查看PDF {i}", key=f"pdf_{i}"):
+
+                    st.write("👉 按钮被点击了")
+                    st.session_state.selected_pdf = pdf_url
+                    st.session_state.clicked = True
+
+                    file_path = download_pdf(pdf_url, f"paper_{i}.pdf")
+
+                    st.session_state.selected_pdf = file_path
+                    st.session_state.rag_store = None
+                    st.session_state.rag_pdf = file_path
+
+                    st.rerun()
 
             # 提取信息
             with st.expander("提取信息"):
@@ -179,8 +202,26 @@ with col_main:
 # ============================
 with col_pdf:
     st.header("PDF 预览")
-    if st.session_state.selected_pdf:
-        pdf_viewer(st.session_state.selected_pdf)
+    if st.session_state.selected_pdf and os.path.exists(st.session_state.selected_pdf):
+        print("PDF路径:", st.session_state.selected_pdf)
+        print("文件存在:", os.path.exists(st.session_state.selected_pdf) if st.session_state.selected_pdf else "None")
+        pdf_viewer(st.session_state.selected_pdf, width=700, height=1000)
+
+        # 构建 RAG（只构建一次）
+        if st.session_state.rag_store is None:
+            with st.spinner("正在构建论文索引..."):
+                st.session_state.rag_store = build_rag(st.session_state.selected_pdf)
+
+        st.success("RAG已就绪，可以提问")
+        question = st.text_input("问这篇论文的问题")
+
+        if question and st.session_state.rag_store:
+
+            with st.spinner("正在回答..."):
+                answer = query_rag(st.session_state.rag_store, question)
+
+            st.markdown("### 回答")
+            st.write(answer)
 
     else:
         st.info("点击左侧论文查看 PDF")

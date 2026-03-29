@@ -1,7 +1,25 @@
 import streamlit as st
 import requests
 import time
+import arxiv
 
+def search_arxiv(query, max_results=3):
+    search = arxiv.Search(
+        query=query,
+        max_results=max_results
+    )
+
+    papers = []
+
+    for result in search.results():
+        papers.append({
+            "title": result.title,
+            "summary": result.summary,
+            "pdf_url": result.pdf_url,
+            "url": result.entry_id
+        })
+
+    return papers
 
 def rate_limit():
     if "last_request_time" not in st.session_state:
@@ -35,7 +53,7 @@ def safe_search(query, max_results):
     if not rate_limit():
         return []
 
-    papers = search_papers(query, max_results)
+    papers = cached_search(query, max_results)
     print("DEBUG: API返回papers数量:", len(papers))
 
     if papers:
@@ -53,7 +71,7 @@ def safe_search(query, max_results):
 
 @st.cache_data(ttl=600)
 def cached_search(query, max_results):
-    return search_papers(query, max_results)
+    return search_arxiv(query, max_results)
 
 def search_papers(query, max_results=3):
     time.sleep(3)
@@ -89,6 +107,10 @@ def search_papers(query, max_results=3):
                     if paper.get("openAccessPdf") else None
                 )
             })
+
+        if not papers or all(p.get("pdf_url") is None for p in papers):
+            print("切换到 arXiv")
+            papers = search_arxiv(query, max_results)
 
         return papers
 

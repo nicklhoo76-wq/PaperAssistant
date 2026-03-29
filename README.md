@@ -1,6 +1,6 @@
 # PaperAssistant
 
-A ChatGPT-style research assistant for automatic paper retrieval, analysis, and comparison.
+A ChatGPT-style research assistant agent for automatic paper retrieval, analysis, and comparison.
 
 ## Features
 
@@ -46,8 +46,15 @@ paper-agent/
 ├── app.py                  # Streamlit UI
 │
 ├── retrieval/
-│   ├── search.py           # arXiv search
+│   ├── search.py           # paper search
 │   └── download.py         # PDF download
+│
+├── rag/
+│   ├── embedding.py        # text embedding
+│   ├── pdf_loader.py       # PDF loading
+│   ├── rag_pipeline.py     # main pipeline
+│   ├── splitter.py         # text splitting
+│   └── vector_store.py     # vector stored
 │
 ├── extraction/
 │   ├── extractor.py        # LLM-based extraction
@@ -71,7 +78,7 @@ pip install -r requirements.txt
 Or manually:
 
 ```bash
-pip install streamlit pymupdf requests
+pip install streamlit arxiv pymupdf requests faiss-cpu sentence-transformers
 ```
 
 
@@ -89,14 +96,14 @@ pip install streamlit pymupdf requests
 ## Tech Stack
 
 * **Frontend/UI**: Streamlit
-* **Paper Source**: Semantic Scholar API
+* **Paper Source**: arXiv API
 * **PDF Parsing**: PyMuPDF
 * **LLM Integration**: (e.g., DeepSeek / OpenAI)
 
 
 ## Known Issues
 
-* Semantic Scholar API may return **429 (rate limit)** (retrying it after a few minutes is suggested)
+* paper API may return **429 (rate limit)** (retrying it after a few minutes is suggested)
 * LLM output may be unstable without proper prompting
 * PDF viewing button no responds
 
