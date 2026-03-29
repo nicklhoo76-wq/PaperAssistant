@@ -2,8 +2,6 @@
 
 A ChatGPT-style research assistant for automatic paper retrieval, analysis, and comparison.
 
----
-
 ## Features
 
 * **Paper Retrieval**
@@ -23,10 +21,8 @@ A ChatGPT-style research assistant for automatic paper retrieval, analysis, and 
 * **Chat-style Interface**
   Interactive UI built with Streamlit.
 
-* **PDF Viewer**
+* **PDF Viewer(not completed yet)**
   Download and preview paper PDFs directly inside the app.
-
----
 
 ## Demo
 
@@ -41,8 +37,6 @@ Then open:
 ```
 http://localhost:8501
 ```
-
----
 
 ## Project Structure
 
@@ -67,7 +61,6 @@ paper-agent/
 └── README.md
 ```
 
----
 
 ## Installation
 
@@ -78,10 +71,9 @@ pip install -r requirements.txt
 Or manually:
 
 ```bash
-pip install streamlit arxiv pymupdf requests
+pip install streamlit pymupdf requests
 ```
 
----
 
 ## Usage
 
@@ -91,35 +83,31 @@ pip install streamlit arxiv pymupdf requests
    * Retrieve relevant papers
    * Extract key information
    * Generate a comparison report
-3. Click a paper to preview its PDF
+3. Click a paper below to preview its PDF
 
----
 
 ## Tech Stack
 
 * **Frontend/UI**: Streamlit
-* **Paper Source**: arXiv API
+* **Paper Source**: Semantic Scholar API
 * **PDF Parsing**: PyMuPDF
 * **LLM Integration**: (e.g., DeepSeek / OpenAI)
 
----
 
 ## Known Issues
 
-* arXiv API may return **429 (rate limit)**
+* Semantic Scholar API may return **429 (rate limit)** (retrying it after a few minutes is suggested)
 * LLM output may be unstable without proper prompting
-* PDF parsing currently reads limited pages
+* PDF viewing button no responds
 
----
 
 ## Future Work
 
-* [ ] RAG-based paper QA (grounded answers with citations)
+* [ ] RAG-based paper QA (grounded answers with citations & no api requests)
 * [ ] Multi-agent architecture (planner / reviewer)
 * [ ] Better PDF understanding (figure & table parsing)
 * [ ] Deployment (Streamlit Cloud / Docker)
 
----
 
 ## Highlights
 
@@ -127,7 +115,6 @@ pip install streamlit arxiv pymupdf requests
 * Real-world integration (API + PDF + LLM)
 * Interactive product-style UI
 
----
 
 ## License
 
