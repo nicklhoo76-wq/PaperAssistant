@@ -21,7 +21,7 @@ A ChatGPT-style research assistant agent for automatic paper retrieval, analysis
 * **Chat-style Interface**
   Interactive UI built with Streamlit.
 
-* **PDF Viewer(not completed yet)**
+* **PDF Viewer**
   Download and preview paper PDFs directly inside the app.
 
 ## Demo
@@ -91,6 +91,7 @@ pip install streamlit arxiv pymupdf requests faiss-cpu sentence-transformers
    * Extract key information
    * Generate a comparison report
 3. Click a paper below to preview its PDF
+4. Question about the paper under the PDF based on RAG
 
 
 ## Tech Stack
@@ -103,14 +104,14 @@ pip install streamlit arxiv pymupdf requests faiss-cpu sentence-transformers
 
 ## Known Issues
 
-* paper API may return **429 (rate limit)** (retrying it after a few minutes is suggested)
+* answers in paper QA is not good enough (especially with Chinese questions)
 * LLM output may be unstable without proper prompting
-* PDF viewing button no responds
+* paper API may return 429 (rate limit) so retrying it after a few minutes is suggested
 
 
 ## Future Work
 
-* [ ] RAG-based paper QA (grounded answers with citations & no api requests)
+* [ ] RAG-based paper QA (**better** grounded answers with citations)
 * [ ] Multi-agent architecture (planner / reviewer)
 * [ ] Better PDF understanding (figure & table parsing)
 * [ ] Deployment (Streamlit Cloud / Docker)
