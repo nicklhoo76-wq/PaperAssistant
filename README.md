@@ -81,6 +81,19 @@ Or manually:
 pip install streamlit arxiv pymupdf requests faiss-cpu sentence-transformers
 ```
 
+Then, set your LLM API key to use it for report generation permanently：
+
+```bash
+setx LLM_API_KEY your_api_key
+```
+but temporarily:
+
+```bash
+set LLM_API_KEY=your_api_key
+```
+
+(e.g., if you use openai, LLM_API_KEY is OPENAI_API_KEY)
+
 
 ## Usage
 
@@ -97,7 +110,7 @@ pip install streamlit arxiv pymupdf requests faiss-cpu sentence-transformers
 ## Tech Stack
 
 * **Frontend/UI**: Streamlit
-* **Paper Source**: arXiv API
+* **Paper Source**: multiple source (arXiv API, Semantic Scholar)
 * **PDF Parsing**: PyMuPDF
 * **LLM Integration**: (e.g., DeepSeek / OpenAI)
 
