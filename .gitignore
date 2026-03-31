@@ -13,3 +13,6 @@ pdfs/
 
 # OS
 .DS_Store
+
+#编辑器
+.vscode/

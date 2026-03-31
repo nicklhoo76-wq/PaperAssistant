@@ -2,6 +2,22 @@ import streamlit as st
 import requests
 import time
 import arxiv
+import random
+from datetime import datetime
+
+def add_noise(query):
+    now = datetime.now()
+    year, month = now.year, now.month
+    year_list = list(i for i in range(year - 3, year + 1))
+    
+    the_year = random.choice(year_list)
+    if the_year == year:
+        month_list = list(i for i in range(1, month + 1))
+    else:
+        month_list = list(i for i in range(1, 13))
+    the_month  = random.choice(month_list)
+
+    return query + f" {the_year}.{the_month}"
 
 def search_arxiv(query, max_results=3):
     search = arxiv.Search(
@@ -39,11 +55,6 @@ def rate_limit():
 def safe_search(query, max_results):
     print("DEBUG: 查询关键词:", query)
 
-    # cache命中
-    if query in st.session_state.cache:
-        print("DEBUG: 缓存命中")
-        return st.session_state.cache[query]
-
     last_call_time = getattr(st.session_state, "last_api_call", 0)
     if time.time() - last_call_time < 1:  # 1秒间隔
         time.sleep(1)
@@ -71,9 +82,14 @@ def safe_search(query, max_results):
 
 @st.cache_data(ttl=600)
 def cached_search(query, max_results):
-    return search_arxiv(query, max_results)
+    try:
+        print("尝试arXiv")
+        return search_arxiv(query, max_results)
+    except:
+        print("切换到Semantic Scholar")
+        return search_semantic(query, max_results)
 
-def search_papers(query, max_results=3):
+def search_semantic(query, max_results=3):
     time.sleep(3)
     url = "https://api.semanticscholar.org/graph/v1/paper/search"
 
@@ -107,10 +123,6 @@ def search_papers(query, max_results=3):
                     if paper.get("openAccessPdf") else None
                 )
             })
-
-        if not papers or all(p.get("pdf_url") is None for p in papers):
-            print("切换到 arXiv")
-            papers = search_arxiv(query, max_results)
 
         return papers
 

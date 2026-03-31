@@ -1,4 +1,5 @@
 from utils.llm import ask_llm
+import streamlit as st
 
 def extract_summary(paper):
     """
@@ -35,7 +36,6 @@ Return JSON.
 """
     return ask_llm(prompt)
 
-from utils.llm import ask_llm
 
 def analyze_method(title, method_text):
     prompt = f"""
@@ -69,3 +69,6 @@ Extract:
 - comparison results
 """
     return ask_llm(prompt)
+
+def save_cache(query, report, papers, extracted):
+    st.session_state.cache[query] = (report, papers, extracted)

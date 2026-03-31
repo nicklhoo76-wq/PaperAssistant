@@ -1,7 +1,7 @@
 import streamlit as st
-from retrieval.search import safe_search
+from retrieval.search import safe_search, add_noise
 from retrieval.download import download_pdf
-from extraction.extractor import extract_summary
+from extraction.extractor import extract_summary, save_cache
 from comparison.compare import compare_papers
 from streamlit_pdf_viewer import pdf_viewer
 from rag.rag_pipeline import build_rag, query_rag
@@ -56,6 +56,12 @@ with st.sidebar:
     st.title("导航栏")
     st.header("设置")
     max_papers = st.slider("检索论文数量", min_value=2, max_value=6, value=4)
+
+    if st.button("清空缓存"):
+        st.session_state.cache = {}
+        st.session_state.selected_pdf = None
+        st.rerun()
+
     if st.button("清空历史"):
         st.session_state.messages = []
         st.session_state.cache = {}
@@ -64,12 +70,13 @@ with st.sidebar:
         st.rerun()
 
     st.header("历史对话")
-    for i, msg in enumerate(st.session_state.messages):
-        role = "你" if msg["role"] == "user" else "助手"
-        if i % 2 == 0:
-            st.markdown(f"{int(i/2+1)}. **{role}**: {msg['content'][:50]}{'...' if len(msg['content'])>50 else ''}")
+    count = 0
+    for msg in st.session_state.messages:
+        if msg["role"] == "user":
+            count += 1
+            st.markdown(f"{count}. **你**: {msg['content'][:50]}...")
         else:
-            st.markdown(f"  **{role}**: {msg['content'][:50]}{'...' if len(msg['content'])>50 else ''}\n\n")
+            st.markdown(f"   **助手**: {msg['content'][:50]}...")
 
 # ============================
 # 中间：主分析
@@ -91,19 +98,41 @@ with col_main:
 
         # 如果有缓存，直接用
         if query in st.session_state.cache:
-            report, papers, extracted = st.session_state.cache[query]
+            data = st.session_state.cache.get(query)
+
+            if not data:
+                st.warning("缓存不存在")
+                st.stop()
+
+            if not isinstance(data, tuple) or len(data) != 3:
+                st.warning("缓存损坏，正在重置，请点击导航栏：清空缓存")
+                del st.session_state.cache[query]
+                st.stop()
+
+            report, papers, extracted = data
 
         else:
             # =========================
             # Step 1: 搜索
             # =========================
             with st.spinner("正在检索论文..."):
-                papers = safe_search(query, max_results=max_papers)
+                query_with_noise = add_noise(query)
+                papers = safe_search(query_with_noise, max_results=max_papers)
 
             print("DEBUG: 返回论文列表:", papers)
 
             if not papers or all(p['title'] == "Fallback Paper" for p in papers):
-                st.warning("API 没有返回真实论文")
+
+                error_msg = "当前请求过多，未获取到论文，请更换关键词或稍后重试重试"
+
+                # 补一个 assistant（关键）
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": error_msg
+                })
+
+                st.warning(error_msg)
+
                 st.session_state.running = False
                 st.stop()
 
@@ -146,16 +175,17 @@ with col_main:
             with st.spinner("正在生成对比报告..."):
                 try:
                     report = compare_papers(extracted)
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": report
+                    })
+
+                    # 缓存结果
+                    save_cache(query, report, papers, extracted)
+
                 except Exception as e:
                     report = f"对比失败: {e}"
 
-            # 缓存结果
-            st.session_state.cache[query] = (report, papers, extracted)
-        st.session_state.messages.append({
-                "role": "assistant",
-                "content": report
-            })
-        
         # 关键：防止重复执行
         st.session_state.running = False
     
@@ -189,11 +219,11 @@ with col_main:
                 st.info("该论文没有开放PDF")
                 continue
 
-            if st.button(f"查看PDF {i}", key=f"pdf_{i}"):
+            if st.button(f"查看PDF {i}", key=f"pdf_{st.session_state.current_query}_{i}"):
 
-                st.write("按钮触发成功")
+                #st.write("按钮触发成功")
 
-                file_path = download_pdf(pdf_url, f"paper_{i}.pdf")
+                file_path = download_pdf(pdf_url, f"paper_{st.session_state.current_query}_{i}.pdf")
 
                 if file_path:
                     st.session_state.selected_pdf = file_path
