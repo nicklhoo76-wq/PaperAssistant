@@ -50,11 +50,9 @@ paper-agent/
 │   └── download.py         # PDF download
 │
 ├── rag/
-│   ├── embedding.py        # text embedding
+│   ├── deepseek_llm.py     # LLM wrapper
 │   ├── pdf_loader.py       # PDF loading
-│   ├── rag_pipeline.py     # main pipeline
-│   ├── splitter.py         # text splitting
-│   └── vector_store.py     # vector stored
+│   └── rag_pipeline.py     # main pipeline
 │
 ├── extraction/
 │   ├── extractor.py        # LLM-based extraction
