@@ -24,6 +24,9 @@ A ChatGPT-style research assistant agent for automatic paper retrieval, analysis
 * **PDF Viewer**
   Download and preview paper PDFs directly inside the app.
 
+* **RAG-based paper QA**
+  Answer paper questions using LLM with LangChain.
+
 ## Demo
 
 Run the app locally:
@@ -92,6 +95,12 @@ set LLM_API_KEY=your_api_key
 
 (e.g., if you use openai, LLM_API_KEY is OPENAI_API_KEY)
 
+**notice**: we use deepseek here for RAG QA, but if you want to use gpt, please change Line 16 in rag\rag_pipeline into just like this without other requirements:
+
+```Python
+llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+```
+
 
 ## Usage
 
@@ -102,7 +111,7 @@ set LLM_API_KEY=your_api_key
    * Extract key information
    * Generate a comparison report
 3. Click a paper below to preview its PDF
-4. Question about the paper under the PDF based on RAG
+4. Question on the paper below
 
 
 ## Tech Stack
@@ -111,11 +120,12 @@ set LLM_API_KEY=your_api_key
 * **Paper Source**: multiple source (arXiv API, Semantic Scholar)
 * **PDF Parsing**: PyMuPDF
 * **LLM Integration**: (e.g., DeepSeek / OpenAI)
+* **RAG QA**: LangChain
 
 
 ## Known Issues
 
-* answers in paper QA is not good enough (especially with Chinese questions)
+* source_documents in paper QA can't be generated
 * LLM output may be unstable without proper prompting
 * paper API may return 429 (rate limit) so retrying it after a few minutes is suggested
 

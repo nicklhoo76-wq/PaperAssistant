@@ -16,3 +16,6 @@ pdfs/
 
 #编辑器
 .vscode/
+
+#测试
+main.py

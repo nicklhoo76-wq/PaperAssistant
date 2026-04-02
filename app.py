@@ -249,7 +249,7 @@ with col_pdf:
         print("文件存在:", os.path.exists(st.session_state.selected_pdf) if st.session_state.selected_pdf else "None")
         pdf_viewer(st.session_state.selected_pdf, width=700, height=1000)
 
-        # 构建 RAG（只构建一次）
+        # 构建 RAG
         if st.session_state.rag_store is None:
             with st.spinner("正在构建论文索引..."):
                 st.session_state.rag_store = build_rag(st.session_state.selected_pdf)
@@ -260,10 +260,20 @@ with col_pdf:
         if question and st.session_state.rag_store:
 
             with st.spinner("正在回答..."):
-                answer = query_rag(st.session_state.rag_store, question)
+                answer, sources = query_rag(st.session_state.rag_store, question)
 
             st.markdown("### 回答")
             st.write(answer)
+            print(f"DEBUG:参考来源：{sources}")
+
+            with st.expander("参考来源"):
+                if sources:
+                    for i, doc in enumerate(sources):
+                        source = doc.metadata.get("source", "unknown")
+                        st.markdown(f"**片段 {i+1} - 来源: {source}**")
+                        st.write(doc.page_content[:300])
+                else:
+                    st.write("暂无参考来源")
 
     else:
         st.info("点击左侧论文查看 PDF")
