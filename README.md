@@ -95,7 +95,7 @@ set LLM_API_KEY=your_api_key
 
 (e.g., if you use openai, LLM_API_KEY is OPENAI_API_KEY)
 
-**notice**: we use deepseek here for RAG QA, but if you want to use gpt, please change Line 16 in rag\rag_pipeline into just like this without other requirements:
+**notice**: we use deepseek here for RAG QA, but if you want to use gpt, please change Line 16 in rag\rag_pipeline.py into just like this without other requirements:
 
 ```Python
 llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
