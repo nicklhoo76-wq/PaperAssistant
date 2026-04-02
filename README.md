@@ -78,7 +78,7 @@ pip install -r requirements.txt
 Or manually:
 
 ```bash
-pip install streamlit arxiv pymupdf requests faiss-cpu sentence-transformers
+pip install streamlit arxiv pymupdf requests faiss-cpu sentence-transformers angchain langchain-community langchain-openai langchain-text-splitters
 ```
 
 Then, set your LLM API key to use it for report generation permanently：

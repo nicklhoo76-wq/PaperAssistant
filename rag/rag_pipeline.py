@@ -1,25 +1,49 @@
 from rag.pdf_loader import load_pdf
-from rag.splitter import split_text
-from rag.embedding import embed_texts, model
-from rag.vector_store import VectorStore
+from rag.deepseek_llm import DeepSeekLLM
+from sentence_transformers import SentenceTransformer
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_classic.chains.retrieval_qa.base import RetrievalQA
+from langchain_openai import ChatOpenAI
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+# ---------------------------------
+# 初始化模型
+# ---------------------------------
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+#llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+llm = DeepSeekLLM()
+
+# ---------------------------------
+# 构建 RAG
+# ---------------------------------
 def build_rag(pdf_path):
     text = load_pdf(pdf_path)
-    chunks = split_text(text)
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=800,
+        chunk_overlap=150
+    )
+    chunks = splitter.split_text(text)
 
-    embeddings = embed_texts(chunks)
+    # LangChain FAISS 索引
+    store = FAISS.from_texts(chunks, embeddings)
 
-    store = VectorStore(len(embeddings[0]))
-    store.add(embeddings, chunks)
+    # RetrievalQA 链
+    retriever = store.as_retriever(search_type="mmr", search_kwargs={"k": 4})
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm,
+        retriever=retriever,
+        return_source_documents=False
+    )
 
-    return store
+    return qa_chain
 
 
-def query_rag(store, query):
-    query_emb = model.encode([query])[0]
-    results = store.search(query_emb)
-
-    # 简单拼接作为回答
-    answer = "\n\n".join(results)
-
+# ---------------------------------
+# 查询 RAG
+# ---------------------------------
+def query_rag(qa_chain, question):
+    # qa_chain 直接返回回答
+    answer = qa_chain.run(question)
     return answer
