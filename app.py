@@ -264,8 +264,8 @@ with col_pdf:
 
             st.markdown("### 回答")
             st.write(answer)
-            print(f"DEBUG:参考来源：{sources}")
 
+            print(f"DEBUG:参考来源：{sources}")
             with st.expander("参考来源"):
                 if sources:
                     for i, doc in enumerate(sources):

@@ -92,6 +92,7 @@ but temporarily:
 ```bash
 set LLM_API_KEY=your_api_key
 ```
+and edit utils\llm.py after that.
 
 (e.g., if you use openai, LLM_API_KEY is OPENAI_API_KEY)
 
@@ -125,14 +126,13 @@ llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
 
 ## Known Issues
 
-* source_documents in paper QA can't be generated
 * LLM output may be unstable without proper prompting
 * paper API may return 429 (rate limit) so retrying it after a few minutes is suggested
 
 
 ## Future Work
 
-* [ ] RAG-based paper QA (**better** grounded answers with citations)
+* [ ] RAG-based paper QA (**better** grounded answers)
 * [ ] Multi-agent architecture (planner / reviewer)
 * [ ] Better PDF understanding (figure & table parsing)
 * [ ] Deployment (Streamlit Cloud / Docker)
