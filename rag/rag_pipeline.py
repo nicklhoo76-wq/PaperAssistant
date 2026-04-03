@@ -22,10 +22,13 @@ llm = DeepSeekLLM()
 prompt_template = """
 你是一个顶级论文分析助手，请基于给定论文片段回答问题。
 
+【上下文说明】
+在提供的论文片段中，每个片段都标注了其来源页码（格式：【第X页】）。
+
 【要求】
 1. 必须用自己的话总结，不要逐字复制原文
 2. 回答必须结构化，不超过300字
-3. 在回答中标注绝对真实的引用来源，例如 [第3页]
+3. 在回答中标注绝对真实的引用来源，格式为 [第X页]，对应论文片段中的页码
 4. 即使信息不完整，也基于已有内容进行合理推断并总结
 
 【论文片段】
@@ -71,7 +74,7 @@ def build_rag(pdf_path):
         for i, chunk in enumerate(chunks):
             docs.append(
                 Document(
-                    page_content=chunk,
+                    page_content=f"【第{page_num}页】{chunk}",
                     metadata={
                         "source": f"第{page_num}页",
                         "page": page_num,

@@ -25,7 +25,7 @@ A ChatGPT-style research assistant agent for automatic paper retrieval, analysis
   Download and preview paper PDFs directly inside the app.
 
 * **RAG-based paper QA**
-  Answer paper questions using LLM with LangChain.
+  Answer paper questions using LLM with LangChain and highlighted citation.
 
 ## Demo
 
@@ -76,12 +76,6 @@ paper-agent/
 pip install -r requirements.txt
 ```
 
-Or manually:
-
-```bash
-pip install streamlit arxiv pymupdf requests faiss-cpu sentence-transformers angchain langchain-community langchain-openai langchain-text-splitters
-```
-
 Then, set your LLM API key to use it for report generation permanently：
 
 ```bash
@@ -92,7 +86,6 @@ but temporarily:
 ```bash
 set LLM_API_KEY=your_api_key
 ```
-and edit utils\llm.py after that.
 
 (e.g., if you use openai, LLM_API_KEY is OPENAI_API_KEY)
 
@@ -101,6 +94,8 @@ and edit utils\llm.py after that.
 ```Python
 llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
 ```
+
+and please change everything related to api in utils\llm.py after that.
 
 
 ## Usage
@@ -113,6 +108,7 @@ llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
    * Generate a comparison report
 3. Click a paper below to preview its PDF
 4. Question on the paper below
+5. Click the page button to highlight the citation sources in the PDF
 
 
 ## Tech Stack
@@ -143,6 +139,7 @@ llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
 * End-to-end AI agent pipeline
 * Real-world integration (API + PDF + LLM)
 * Interactive product-style UI
+* Highlighted answer citation
 
 
 ## License
